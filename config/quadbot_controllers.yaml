@@ -1,0 +1,19 @@
+controller_manager:                                         # Название ноды для которой написан конфиг
+  ros__parameters:                                          # Обязательный для ROS2 параметр
+    update_rate: 100                                        # Период обновления
+    joint_state_broadcaster:                                # Блок описывающий JointStateBroadcaster
+      type: joint_state_broadcaster/JointStateBroadcaster   # Назначается JointStateBroadcaster для публикации состаяния суставов. Без параметров.
+    quadbot_base_controller:                                # Имя конфигурации конкретного экземпляра контроллера (может быть произвольным)
+      type: diff_drive_controller/DiffDriveController       # Указание необходимого контроллера. Выбираем один из стандартных или пишем свой 
+
+quadbot_base_controller:                                                      # Указываем конфиг конкретного контроллера
+  ros__parameters:                                                            # Обязательный для ROS2 параметр
+    publish_rate: 50.0                                                        # Частота публикации данных одометрии
+    base_frame_id: base_link                                                  # Имя базовой ссылки в URDF файле
+    left_wheel_names: ["front_left_wheel_joint", "rear_left_wheel_joint"]     # Имена соединений левых колес
+    right_wheel_names: ["front_right_wheel_joint", "rear_right_wheel_joint"]  # Имена соединений правых колес
+    wheel_separation: 0.3                                                     # Расстояние между колесами
+    wheel_radius: 0.05                                                        # Радиус колеса
+    use_stamped_vel: false                                                    # (ОПЦИОНАЛЬНО) НЕ использует TwistStamped (только Twist) Выбирается для работы с NAV2. Ждет указания из /cmd_vel_unstamped [geometry_msgs/msg/Twist]. Применимо на начальных этапах разработки
+    enable_odom_tf: true                                                      # (ОПЦИОНАЛЬНО) Публикует TF odom → base_link
+    odom_frame_id: odom                                                       # (ОПЦИОНАЛЬНО) Фрейм одометрии для TF и /odom

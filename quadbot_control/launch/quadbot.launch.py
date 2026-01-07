@@ -15,19 +15,26 @@ def generate_launch_description():
         DeclareLaunchArgument("use_mock_hardware", default_value="true", description="Use mock hardware"),
     ]
 
+    # Переменные для аргументов
     gui = LaunchConfiguration("gui")
     use_mock_hardware = LaunchConfiguration("use_mock_hardware")
 
+    # Находим файл с описанием рообота и парсим его с помощью xacro
+        # Command - выполняет внешнюю shell команду и возвращает вывод как строку
+        # PathJoinSubstitution - безопасно склеивает пути, учитывая особенности разных операционных систем
+        # FindExecutable - находит полный путь к исполняемомоу файлу в системе (аргументом нужно передать имя)
     robot_description_content = Command([
         PathJoinSubstitution([FindExecutable(name="xacro")]),
         " ", PathJoinSubstitution([FindPackageShare("quadbot_control"), "urdf", "quadbot.urdf.xacro"]),
         " ", "use_mock_hardware:=", use_mock_hardware,
     ])
+
+    # Словарь с описанием робота для robot_state_publisher (он ожидает параметр с именем "robot_description" (точно таким), 
+    # содержащий строку с URDF)
     robot_description = {"robot_description": robot_description_content}
 
-    robot_controllers = PathJoinSubstitution([
-        FindPackageShare("quadbot_control"), "config", "quadbot_controllers.yaml"
-    ])
+    # Получаем параметры контроллеров в переменную
+    robot_controllers = PathJoinSubstitution([FindPackageShare("quadbot_control"), "config", "quadbot_controllers.yaml"])
 
     control_node = Node(
         package="controller_manager",
