@@ -36,49 +36,67 @@ def generate_launch_description():
     # Получаем параметры контроллеров в переменную
     robot_controllers = PathJoinSubstitution([FindPackageShare("quadbot_control"), "config", "quadbot_controllers.yaml"])
 
+    # Настраиваем ноду для ros2_control
     control_node = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[robot_controllers],
-        output="both",
+        package="controller_manager",       # Указываем пакет
+        executable="ros2_control_node",     # Указываем исполняемый файл
+        parameters=[robot_controllers],     # Передаем в него параметры контроллеров
+        output="both",                      # Указываем куда выводить логи (both - терминал + ~/.ros/log/YYYY-MM-DD-HH-MM-SS-*.log.)
     )
 
+    # Настраиваем ноду для robot_state_publisher
     robot_state_pub_node = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        parameters=[robot_description],
-        output="both",
+        package="robot_state_publisher",    # Указываем пакет
+        executable="robot_state_publisher", # Указываем исполняемый файл
+        parameters=[robot_description],     # Передаем в него описание робота
+        output="both",                      # Указываем куда выводить логи (both - терминал + ~/.ros/log/YYYY-MM-DD-HH-MM-SS-*.log.)
     )
 
+    # Настраиваем ноду для rviz2
     rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="log",
-        arguments=["-d", PathJoinSubstitution([FindPackageShare("quadbot_control"), "config", "quadbot.rviz"])],
-        condition=IfCondition(gui),
+        package="rviz2",                                                                                            # Указываем пакет
+        executable="rviz2",                                                                                         # Указываем исполняемый файл
+        name="rviz2",                                                                                               # Указываем свое имя ноды, иначе будет дано уникальное
+        output="log",                                                                                               # Вывод логов только в логи (~/.ros/log/YYYY-MM-DD-HH-MM-SS-*.log.)
+        arguments=["-d", PathJoinSubstitution([FindPackageShare("quadbot_control"), "config", "quadbot.rviz"])],    # Аргумент для графического интерфейса, иначе будут параметры по умолчанию
+        condition=IfCondition(gui),                                                                                 # Нода стартует только если указанный аргумент "true"
     )
 
+    # Запускает указанный в конфигурации контроллер с помощью исполняемого файла spawner из controller manager
     joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster"],
+        package="controller_manager",           # Указываем пакет
+        executable="spawner",                   # Указываем исполняемый файл
+        arguments=["joint_state_broadcaster"],  # Указываем необходимый контроллер в параметрах
     )
 
+    # Запускает указанный в конфигурации контроллер с помощью исполняемого файла spawner из controller manager
     robot_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["quadbot_base_controller", "--param-file", robot_controllers],
+        package="controller_manager",                                               # Указываем пакет
+        executable="spawner",                                                       # Указываем исполняемый файл
+        arguments=["quadbot_base_controller", "--param-file", robot_controllers],   # Указываем необходимый контроллер и его параметры для более точной, относительно joint_state_broadcaster работы
+        remappings=[('/cmd_vel', '/cmd_vel_unstamped')],  # ← КЛЮЧЕВОЕ!
     )
 
+    # Указываем задержку для запуска ноды rviz2
     delay_rviz = RegisterEventHandler(
-        event_handler=OnProcessExit(target_action=joint_state_broadcaster_spawner, on_exit=[rviz_node]),
-    )
-    delay_controller = RegisterEventHandler(
-        event_handler=OnProcessExit(target_action=joint_state_broadcaster_spawner, on_exit=[robot_controller_spawner]),
+        event_handler=OnProcessExit(                        # Действие, которое ожидаем (процесс завершился)
+            target_action=joint_state_broadcaster_spawner,  # Объект отслеживания
+            on_exit=[rviz_node]),                           # Объект выполнения после действия
     )
 
-    return LaunchDescription(declared_arguments + [
-        control_node, robot_state_pub_node, joint_state_broadcaster_spawner,
-        delay_rviz, delay_controller
+    # Указываем задержку для запуска ноды robot_controller_spawner
+    delay_controller = RegisterEventHandler(
+        event_handler=OnProcessExit(                        # Действие, которое ожидаем (процесс завершился)
+            target_action=joint_state_broadcaster_spawner,  # Объект отслеживания
+            on_exit=[robot_controller_spawner]),            # Объект выполнения после действия
+    )
+
+    # Собирает итоговый файл для запуска и аргументы указанные при вызове лаунча
+    return LaunchDescription(
+        declared_arguments + [
+        control_node, 
+        robot_state_pub_node, 
+        joint_state_broadcaster_spawner,
+        #delay_rviz, 
+        delay_controller
     ])

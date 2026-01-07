@@ -1,0 +1,8 @@
+Panels:
+  - Class: rviz/Displays
+    Displays:
+      - Class: rviz/RobotModel
+        Topic: /robot_description
+      - Class: rviz/Odometry
+        Topic: /odom  
+      - Class: rviz/TF

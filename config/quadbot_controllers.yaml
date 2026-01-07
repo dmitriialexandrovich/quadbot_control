@@ -14,6 +14,7 @@ quadbot_base_controller:                                                      # 
     right_wheel_names: ["front_right_wheel_joint", "rear_right_wheel_joint"]  # Имена соединений правых колес
     wheel_separation: 0.3                                                     # Расстояние между колесами
     wheel_radius: 0.05                                                        # Радиус колеса
-    use_stamped_vel: false                                                    # (ОПЦИОНАЛЬНО) НЕ использует TwistStamped (только Twist) Выбирается для работы с NAV2. Ждет указания из /cmd_vel_unstamped [geometry_msgs/msg/Twist]. Применимо на начальных этапах разработки
+    cmd_vel_topic: "cmd_vel_unstamped"  # ← ЯВНО!
+    use_stamped_vel: true                                                    # (ОПЦИОНАЛЬНО) НЕ использует TwistStamped (только Twist) Выбирается для работы с NAV2. Ждет указания из /cmd_vel_unstamped [geometry_msgs/msg/Twist]. Применимо на начальных этапах разработки
     enable_odom_tf: true                                                      # (ОПЦИОНАЛЬНО) Публикует TF odom → base_link
     odom_frame_id: odom                                                       # (ОПЦИОНАЛЬНО) Фрейм одометрии для TF и /odom

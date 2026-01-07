@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<robot name="quadbot" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="use_mock_hardware" default="true"/>
+
+  <link name="base_link">
+    <visual>
+      <geometry><box size="0.5 0.4 0.1"/></geometry>
+      <material name="blue"><color rgba="0 0 1 1"/></material>
+    </visual>
+    <collision><geometry><box size="0.5 0.4 0.1"/></geometry></collision>
+    
+
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+  </link>
+
+  <link name="front_left_wheel">
+    <visual><geometry><cylinder radius="0.05" length="0.03"/></geometry></visual>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+  </link>
+  <joint name="front_left_wheel_joint" type="continuous">
+    <parent link="base_link"/><child link="front_left_wheel"/>
+    <origin xyz="0.2 0.15 -0.05" rpy="-1.5708 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="front_right_wheel">
+    <visual><geometry><cylinder radius="0.05" length="0.03"/></geometry></visual>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+  </link>
+  <joint name="front_right_wheel_joint" type="continuous">
+    <parent link="base_link"/><child link="front_right_wheel"/>
+    <origin xyz="0.2 -0.15 -0.05" rpy="-1.5708 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="rear_left_wheel">
+    <visual><geometry><cylinder radius="0.05" length="0.03"/></geometry></visual>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+  </link>
+  <joint name="rear_left_wheel_joint" type="continuous">
+    <parent link="base_link"/><child link="rear_left_wheel"/>
+    <origin xyz="-0.2 0.15 -0.05" rpy="-1.5708 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="rear_right_wheel">
+    <visual><geometry><cylinder radius="0.05" length="0.03"/></geometry></visual>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+  </link>
+  <joint name="rear_right_wheel_joint" type="continuous">
+    <parent link="base_link"/><child link="rear_right_wheel"/>
+    <origin xyz="-0.2 -0.15 -0.05" rpy="-1.5708 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <ros2_control name="QuadBotSystem" type="system">
+    <hardware>
+      <!-- <plugin>ros2_control_demo_hardware/QuadBotSystemHardware</plugin> -->
+
+      <plugin>mock_components/GenericSystem</plugin>
+
+      <param name="use_mock_hardware">true</param>
+    </hardware>
+    <joint name="front_left_wheel_joint">
+      <command_interface name="velocity"/><state_interface name="position"/><state_interface name="velocity"/>
+    </joint>
+    <joint name="front_right_wheel_joint">
+      <command_interface name="velocity"/><state_interface name="position"/><state_interface name="velocity"/>
+    </joint>
+    <joint name="rear_left_wheel_joint">
+      <command_interface name="velocity"/><state_interface name="position"/><state_interface name="velocity"/>
+    </joint>
+    <joint name="rear_right_wheel_joint">
+      <command_interface name="velocity"/><state_interface name="position"/><state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+</robot>
